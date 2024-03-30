@@ -34,8 +34,18 @@ def get_forecast(df):
     with open('steelhacks/data.csv' , 'a') as f:
         forecast[['ds','yhat','yhat_lower','yhat_upper','zone']].tail(24).to_csv(f, header=True, index=False)
     
-    
-combined_df.groupby('zone')[['Datetime (UTC)','Carbon Intensity gCO₂eq/kWh (direct)','zone']].apply(get_forecast)
+
+def get_data_for_zone(zone_names):
+    try:
+        combined_df = pd.concat([load_and_combine_data(zone, ['2021', '2022', '2023']) for zone in zone_names])
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Zone data not found.")
+    combined_df.ffill(inplace=True)
+    combined_df.groupby('zone')[['Datetime (UTC)','Carbon Intensity gCO₂eq/kWh (direct)','zone']].apply(get_forecast)
+
+get_data_for_zone(['US', 'BR'])
+
+
 # @app.get("/predict_hourly/")
 # def predict_hourly(date: str):
 #     # Validate the date format
