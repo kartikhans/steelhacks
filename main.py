@@ -10,6 +10,7 @@ import requests
 from datetime import datetime
 import pandas as pd
 import pytz
+import collections
 
 from helper import create_df
 app = FastAPI()
@@ -163,5 +164,5 @@ def get_prediction_by_hour(hours, timezone):
             'carbon_intensity': row.get('carbon_intensity')
         }
     return {
-        'data': final_data
+        'data': collections.OrderedDict(sorted(final_data.items()))
     }
